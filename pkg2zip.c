@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <dirent.h>
 #include <errno.h>
 #include <stddef.h>
 
@@ -270,27 +269,6 @@ static const char* get_region(const char* id)
     {
         return "unknown region";
     }
-}
-
-int check_dir(char *directory_path)
-{
-	DIR* dir = opendir(directory_path);
-	if (dir)
-	{
-		/* Directory exists. */
-		closedir(dir);
-		return 0;
-	}
-	else if (ENOENT == errno)
-	{
-		/* Directory does not exist. */
-		return -1;
-	}
-	else
-	{
-	/* opendir() failed for some other reason. */
-	return -2;
-	}
 }
 
 
@@ -708,7 +686,7 @@ int main(int argc, char* argv[])
 			snprintf(temp, 1024, "%s%s%08d%s", root, "/", next_dir, "/");
 			snprintf(temp2, 1024, "%s%08d", "/", next_dir);
 			int ret = check_dir(temp);
-			if (ret == -1)
+			if (ret != 0)
 			{
 				sys_vstrncat(root, sizeof(root), temp2);
 				out_add_folder(root);
