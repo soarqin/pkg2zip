@@ -290,6 +290,7 @@ int main(int argc, char* argv[])
 
     int zipped = 1;
     int listing = 0;
+    int extract_eboot = 0;
     int cso = 0;
     const char* pkg_arg = NULL;
     const char* zrif_arg = NULL;
@@ -302,6 +303,10 @@ int main(int argc, char* argv[])
         else if (strcmp(argv[i], "-l") == 0)
         {
             listing = 1;
+        }
+        else if (strcmp(argv[i], "-e") == 0)
+        {
+            extract_eboot = 1;
         }
         else if (strncmp(argv[i], "-c", 2) == 0)
         {
@@ -331,7 +336,7 @@ int main(int argc, char* argv[])
     if (pkg_arg == NULL)
     {
         fprintf(stderr, "ERROR: no pkg file specified\n");
-        sys_error("Usage: %s [-x] [-l] [-c[N]] file.pkg [zRIF]\n", argv[0]);
+        sys_error("Usage: %s [-x] [-l] [-e] [-c[N]] file.pkg [zRIF]\n", argv[0]);
     }
 
     if (listing == 0)
@@ -604,7 +609,7 @@ int main(int argc, char* argv[])
         snprintf(root, sizeof(root), "pspemu/ISO");
         out_add_folder(root);
 
-        if (content_type == 7 && strcmp(category, "HG") == 0)
+        if ((content_type == 7 && strcmp(category, "HG") == 0) || extract_eboot)
         {
             snprintf(root, sizeof(root), "pspemu");
             out_add_folder(root);
@@ -818,9 +823,29 @@ int main(int argc, char* argv[])
             {
                 if (strcmp("USRDIR/CONTENT/EBOOT.PBP", name) == 0)
                 {
-                    snprintf(path, sizeof(path), "pspemu/ISO/%s [%.9s].%s", title, id, cso ? "cso" : "iso");
-                    unpack_psp_eboot(path, item_key, iv, pkg, enc_offset, data_offset, data_size, cso);
-                    continue;
+                    if (extract_eboot) {
+                        snprintf(path, sizeof(path), "pspemu/PSP/GAME/%.9s/EBOOT.PBP", id);
+                    } else {
+                        snprintf(path, sizeof(path), "pspemu/ISO/%s [%.9s].%s", title, id, cso ? "cso" : "iso");
+                        unpack_psp_eboot(path, item_key, iv, pkg, enc_offset, data_offset, data_size, cso);
+                        continue;
+                    }
+                }
+                else if (strcmp("USRDIR/CONTENT/DOCUMENT.DAT", name) == 0)
+                {
+                    if (extract_eboot) {
+                        snprintf(path, sizeof(path), "pspemu/PSP/GAME/%.9s/DOCUMENT.DAT", id);
+                    } else {
+                        continue;
+                    }
+                }
+                else if (strcmp("USRDIR/CONTENT/DOCINFO.EDAT", name) == 0)
+                {
+                    if (extract_eboot) {
+                        snprintf(path, sizeof(path), "pspemu/PSP/GAME/%.9s/DOCINFO.EDAT", id);
+                    } else {
+                        continue;
+                    }
                 }
                 else if (strcmp("USRDIR/CONTENT/PSP-KEY.EDAT", name) == 0)
                 {
