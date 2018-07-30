@@ -286,7 +286,6 @@ typedef enum {
 int main(int argc, char* argv[])
 {
     sys_output_init();
-    sys_output("pkg2zip v1.9\n");
 
     int zipped = 1;
     int listing = 0;
@@ -331,7 +330,7 @@ int main(int argc, char* argv[])
     }
     if (listing == 0)
     {
-        sys_output("pkg2zip v1.8\n");
+        sys_output("pkg2zip v1.9\n");
     }
     if (pkg_arg == NULL)
     {
@@ -681,8 +680,8 @@ int main(int argc, char* argv[])
 		sys_vstrncat(root, sizeof(root), "/t");
 		out_add_folder(root);
 
-        char *temp = malloc(1024);
-		char *temp2 = malloc(1024);
+        char *temp = calloc(1024, 1);
+		char *temp2 = calloc(1024, 1);
 		strncpy(temp, root, 1024);
 		strncat(temp, "/", 1024);
 		int outputdir = 0;
@@ -1014,21 +1013,22 @@ int main(int argc, char* argv[])
 	else if (type == PKG_TYPE_VITA_THEME)
 	{
 		// create a variable containing the titleid
-		char *titleid = malloc(0x30);
+		char *titleid = calloc(0x30, 1);
 		snprintf(titleid, 17, "%.16s\n", content);
+        titleid[16] = 0;
 		titleid += 7;
 		// get pdb data
 		sys_output("[*] generating pdb files\n");
-		uint8_t *pkgdb = malloc(0x2000);
+		uint8_t *pkgdb = calloc(0x2000, 1);
 
 		uint32_t dblen = pkgdbGenerate(pkgdb, 0x2000, title, titleid, content, 
 										pkg_arg, // PKG Name
 										NULL, // PKG Url
 										next_dir); // here is the id example bgdl/t/00000009/ and the id would be bgdl/t/0000000id/
 		// write it to files:
-		char *pdb0 = malloc(0x25);
-		char *pdb1 = malloc(0x25);
-		char *f0 = malloc(0x25);
+		char *pdb0 = calloc(0x25, 1);
+		char *pdb1 = calloc(0x25, 1);
+		char *f0 = calloc(0x25, 1);
 		snprintf(pdb0, 25, "%.16s/d0.pdb", root);
 		snprintf(pdb1, 25, "%.16s/d1.pdb", root);
 		snprintf(f0, 25, "%.16s/f0.pdb", root);
